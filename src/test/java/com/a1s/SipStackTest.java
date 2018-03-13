@@ -1,19 +1,24 @@
 package com.a1s;
 
 
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 
 public class SipStackTest {
+    private static final Logger log = LoggerFactory.getLogger(SipStackTest.class);
+
     @Test
-    public void testAll() throws InterruptedException {
+    public void testAll2() throws InterruptedException {
         final PublishSubject<Long> subject = PublishSubject.create();
 
         subject
@@ -37,24 +42,46 @@ public class SipStackTest {
         subject.onNext(4l);
     }
 
-    /*@Test
+    @Test
     public void testAll() throws InterruptedException {
         Processor processor = new Processor();
 
         final String callId = "123456";
 
-        processor.call(79111234567l, callId);
+        Observable callFlow = processor.call(79111234567l, callId);
 
-        /*processor.response(callId, 100); // trying
+        CountDownLatch latch = new CountDownLatch(1);
+
+        callFlow.subscribe(new DisposableObserver() {
+            @Override
+            public void onNext(Object o) {
+                log.info("Object", o);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("Error", throwable);
+
+                latch.countDown();
+            }
+
+            @Override
+            public void onComplete() {
+                log.info("Completed");
+
+                latch.countDown();
+            }
+        });
+
+        processor.response(callId, 100); // trying
         processor.response(callId, 180); // session in progress
         processor.response(callId, 183); // ringing
 
-        TimeUnit.MILLISECONDS.sleep(250);
+        TimeUnit.MILLISECONDS.sleep(700);
 
         processor.response(callId, 200); // 200 - ok
         processor.response(callId, 487); // 487 - request terminated
 
-    }*/
-
-
+        latch.await();
+    }
 }

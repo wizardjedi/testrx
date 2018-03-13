@@ -1,15 +1,13 @@
 package com.a1s;
 
-import io.reactivex.*;
-import io.reactivex.functions.Function;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subscribers.DisposableSubscriber;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Time;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -59,7 +57,8 @@ public class App {
             );
 
         longFlowable
-            .observeOn(Schedulers.from(Executors.newFixedThreadPool(10)))
+            .subscribeOn(Schedulers.io())//.from(Executors.newFixedThreadPool(10)))
+            //.observeOn(Schedulers.from(Executors.newFixedThreadPool(10)))
             .subscribe(new DisposableSubscriber<Long>() {
                 public void onNext(final Long aLong) {
                     logger.info("Value:{}", aLong);
